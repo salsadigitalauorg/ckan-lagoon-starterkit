@@ -1,0 +1,35 @@
+FROM lagoon/python:2.7.15-ckan
+
+# @todo: Copy production.ini or other /etc content.
+# @todo: Pass in URL via .env variable.
+# @todo: Enable datapusher support.
+
+COPY ckan/default/src /app/src
+COPY scripts/init.sh /app/ckan/
+COPY scripts/custom-init.sh /app/ckan/
+COPY scripts/serve.sh /app/ckan/
+
+RUN . /app/ckan/default/bin/activate \
+    && cd /app/ckan/default \
+    && pip install -e 'git+https://github.com/ckan/ckan.git@ckan-2.7.5#egg=ckan' \
+    && sed -i 's/psycopg2==2.4.5/psycopg2>=2.7/g' /app/ckan/default/src/ckan/requirements.txt \
+    && pip install -r '/app/ckan/default/src/ckan/requirements.txt' \
+    && paster make-config ckan /app/ckan/default/production.ini \
+    && sed -i 's/ckan.site_url.*/ckan.site_url = http:\/\/ckan-example.docker.amazee.io/g' /app/ckan/default/production.ini \
+    && sed -i 's/sqlalchemy.url.*/sqlalchemy.url = postgresql:\/\/ckan:ckan@postgres\/ckan?sslmode=disable/g' /app/ckan/default/production.ini \
+    && sed -i 's/#solr_url.*/solr_url = http:\/\/solr:8983\/solr\/ckan/g' /app/ckan/default/production.ini \
+    && sed -i 's/#ckan.redis.url.*/ckan.redis.url = redis:\/\/redis:6379/g' /app/ckan/default/production.ini \
+    && sed -i 's/#ckan.storage_path.*/ckan.storage_path = \/app\/filestore/g' /app/ckan/default/production.ini \
+    && sed -i '/ckan.plugins/ s/$/ datastore/g' /app/ckan/default/production.ini \
+    && sed -i 's/#ckan.datastore.write_url.*/ckan.datastore.write_url = postgresql:\/\/ckan:ckan@postgres-datastore\/ckan?sslmode=disable/g' /app/ckan/default/production.ini \
+    && sed -i 's/#ckan.datastore.read_url.*/ckan.datastore.read_url = postgresql:\/\/ckan_datastore:ckan@postgres-datastore\/ckan?sslmode=disable/g' /app/ckan/default/production.ini \
+    && deactivate
+
+RUN ln -s /app/ckan /usr/lib/ckan
+RUN fix-permissions /app/ckan \
+    && chmod +x /app/ckan/init.sh \
+    && chmod +x /app/ckan/custom-init.sh \
+    && chmod +x /app/ckan/serve.sh
+
+# @todo: Replace with paster serve entrypoint.
+ENTRYPOINT ["tail", "-f", "/dev/null"]
