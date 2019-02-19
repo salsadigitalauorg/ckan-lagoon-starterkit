@@ -55,7 +55,7 @@ services:
       - amazeeio-network
       - default
     ports:
-      - "5000"
+      - "80"
     image: *lagoon-project
     labels:
       # Lagoon Labels
@@ -65,10 +65,22 @@ services:
     environment:
       - AMAZEEIO_URL=ckan-example.docker.amazee.io
       - AMAZEEIO=AMAZEEIO
-      - AMAZEEIO_HTTP_PORT=5000 
+      - AMAZEEIO_HTTP_PORT=80
       - LAGOON_ROUTE=http://ckan-example.docker.amazee.io
       - LAGOON_ENVIRONMENT_TYPE=production
       - LAGOON_PROJECT=ckan-example
+
+  ckan-datapusher:
+    image: lagoon/python:2.7.15-ckandatapusher
+    ports:
+      - "8800"
+    networks:
+      - bridge
+    links:
+      - "ckan:ckan-example.docker.amazee.io"
+    << : *default-user # uses the defined user from top
+    environment:
+      << : *default-environment
 
   redis:
     image: amazeeio/redis

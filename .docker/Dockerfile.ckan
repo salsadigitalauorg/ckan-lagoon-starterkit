@@ -15,14 +15,17 @@ RUN . /app/ckan/default/bin/activate \
     && sed -i 's/psycopg2==2.4.5/psycopg2>=2.7/g' /app/ckan/default/src/ckan/requirements.txt \
     && pip install -r '/app/ckan/default/src/ckan/requirements.txt' \
     && paster make-config ckan /app/ckan/default/production.ini \
+    && sed -i 's/port = 5000/port = 80/g' /app/ckan/default/production.ini \
     && sed -i 's/ckan.site_url.*/ckan.site_url = http:\/\/ckan-example.docker.amazee.io/g' /app/ckan/default/production.ini \
     && sed -i 's/sqlalchemy.url.*/sqlalchemy.url = postgresql:\/\/ckan:ckan@postgres\/ckan?sslmode=disable/g' /app/ckan/default/production.ini \
     && sed -i 's/#solr_url.*/solr_url = http:\/\/solr:8983\/solr\/ckan/g' /app/ckan/default/production.ini \
     && sed -i 's/#ckan.redis.url.*/ckan.redis.url = redis:\/\/redis:6379/g' /app/ckan/default/production.ini \
     && sed -i 's/#ckan.storage_path.*/ckan.storage_path = \/app\/filestore/g' /app/ckan/default/production.ini \
-    && sed -i '/ckan.plugins/ s/$/ datastore/g' /app/ckan/default/production.ini \
+    && sed -i '/ckan.plugins/ s/$/ datastore datapusher/g' /app/ckan/default/production.ini \
     && sed -i 's/#ckan.datastore.write_url.*/ckan.datastore.write_url = postgresql:\/\/ckan:ckan@postgres-datastore\/ckan?sslmode=disable/g' /app/ckan/default/production.ini \
     && sed -i 's/#ckan.datastore.read_url.*/ckan.datastore.read_url = postgresql:\/\/ckan_datastore:ckan@postgres-datastore\/ckan?sslmode=disable/g' /app/ckan/default/production.ini \
+    && sed -i '/ckan.datapusher/s/^#//g' /app/ckan/default/production.ini \
+    && sed -i 's/ckan.datapusher.url.*/ckan.datapusher.url = http:\/\/ckan-datapusher:8800\//g' /app/ckan/default/production.ini \
     && deactivate
 
 RUN ln -s /app/ckan /usr/lib/ckan
