@@ -23,7 +23,7 @@ x-user:
 services:
 
   postgres:
-    image: lagoon/postgres-ckan
+    image: amazeeio/postgres-ckan
     labels:
       lagoon.type: postgres
     ports:
@@ -35,7 +35,7 @@ services:
       << : *default-environment
 
   postgres-datastore:
-    image: lagoon/postgres-ckan
+    image: amazeeio/postgres-ckan
     labels:
       lagoon.type: postgres
     ports:
@@ -71,7 +71,7 @@ services:
       - LAGOON_PROJECT=ckan-example
 
   ckan-datapusher:
-    image: lagoon/python:2.7.15-ckandatapusher
+    image: amazeeio/python:2.7-ckandatapusher
     ports:
       - "8800"
     networks:

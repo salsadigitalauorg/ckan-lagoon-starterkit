@@ -1,4 +1,4 @@
-FROM lagoon/python:2.7.15-ckan
+FROM amazeeio/python:2.7-ckan
 
 # @todo: Copy production.ini or other /etc content.
 # @todo: Pass in URL via .env variable.
